@@ -161,13 +161,26 @@ struct ContentView: View {
                 
                 // Progress indicator
                 if converter.isConverting {
-                    VStack(spacing: 12) {
-                        ProgressView(value: converter.progress)
-                            .tint(.accentColor)
+                    HStack(spacing: 12) {
+                        VStack(spacing: 12) {
+                            ProgressView(value: converter.progress)
+                                .tint(.accentColor)
+                            
+                            Text(converter.statusMessage)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
                         
-                        Text(converter.statusMessage)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(.secondary)
+                        // Cancel button
+                        Button(action: {
+                            converter.cancelConversion()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.red, .red.opacity(0.2))
+                        }
+                        .buttonStyle(.plain)
+                        .help("Cancel conversion")
                     }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 16)
