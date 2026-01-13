@@ -60,40 +60,43 @@ class VideoConverter: ObservableObject {
             process.executableURL = URL(fileURLWithPath: ffprobePath)
             process.arguments = [
                 "-v", "error",
-                "-select_streams", "v:0",
-                "-show_entries", "stream=codec_name",
-                "-of", "default=noprint_wrappers=1:nokey=1",
+                "-show_entries", "stream=codec_type,codec_name",
+                "-of", "default=noprint_wrappers=1",
                 inputURL.path
             ]
             
-            let videoPipe = Pipe()
-            process.standardOutput = videoPipe
+            let pipe = Pipe()
+            process.standardOutput = pipe
             
             do {
                 try process.run()
                 process.waitUntilExit()
                 
-                let videoData = videoPipe.fileHandleForReading.readDataToEndOfFile()
-                let videoCodec = String(data: videoData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                guard let output = String(data: data, encoding: .utf8) else {
+                    continuation.resume(throwing: ConversionError.codecDetectionFailed)
+                    return
+                }
                 
-                let audioProcess = Process()
-                audioProcess.executableURL = URL(fileURLWithPath: ffprobePath)
-                audioProcess.arguments = [
-                    "-v", "error",
-                    "-select_streams", "a:0",
-                    "-show_entries", "stream=codec_name",
-                    "-of", "default=noprint_wrappers=1:nokey=1",
-                    inputURL.path
-                ]
+                var videoCodec = ""
+                var audioCodec = ""
                 
-                let audioPipe = Pipe()
-                audioProcess.standardOutput = audioPipe
+                let lines = output.split(separator: "\n")
+                var currentType = ""
                 
-                try audioProcess.run()
-                audioProcess.waitUntilExit()
-                
-                let audioData = audioPipe.fileHandleForReading.readDataToEndOfFile()
-                let audioCodec = String(data: audioData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                for line in lines {
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if trimmed.hasPrefix("codec_type=") {
+                        currentType = String(trimmed.dropFirst("codec_type=".count))
+                    } else if trimmed.hasPrefix("codec_name=") {
+                        let codec = String(trimmed.dropFirst("codec_name=".count))
+                        if currentType == "video" && videoCodec.isEmpty {
+                            videoCodec = codec
+                        } else if currentType == "audio" && audioCodec.isEmpty {
+                            audioCodec = codec
+                        }
+                    }
+                }
                 
                 if videoCodec.isEmpty {
                     continuation.resume(throwing: ConversionError.codecDetectionFailed)
@@ -106,7 +109,7 @@ class VideoConverter: ObservableObject {
         }
     }
     
-    func convert(to format: VideoFormat) async throws {
+    func convert(to format: VideoFormat, settings: ConversionSettings) async throws {
         guard let inputURL = inputURL else {
             throw ConversionError.invalidInput
         }
@@ -123,10 +126,72 @@ class VideoConverter: ObservableObject {
         let copyingAudio = format.canCopyAudio(codec: codecs.audioCodec)
         let isFullRemux = copyingVideo && copyingAudio
         
-        // Generate output URL
-        let outputFileName = inputURL.deletingPathExtension().lastPathComponent + "_converted.\(format.fileExtension)"
-        let outputURL = inputURL.deletingLastPathComponent().appendingPathComponent(outputFileName)
-        self.outputURL = outputURL
+        // Determine output URL
+        let outputURL: URL
+        if settings.overwriteOriginal {
+            outputURL = inputURL
+        } else if let custom = settings.customOutputLocation {
+            let filename = inputURL.deletingPathExtension().lastPathComponent + "_converted.\(format.fileExtension)"
+            outputURL = custom.appendingPathComponent(filename)
+        } else {
+            let filename = inputURL.deletingPathExtension().lastPathComponent + "_converted.\(format.fileExtension)"
+            outputURL = inputURL.deletingLastPathComponent().appendingPathComponent(filename)
+        }
+        
+        print("DEBUG: videoCodec = \(settings.videoCodec), audioCodec = \(settings.audioCodec)")
+
+        // Build video arguments
+        var videoArgs: [String] = []
+        if !settings.includeVideo {
+            videoArgs = ["-vn"]  // No video
+        } else if settings.videoCodec == .auto {
+            videoArgs = format.getVideoCodecArgs(sourceCodec: codecs.videoCodec)
+            // Add speed preset and CRF if encoding
+            if videoArgs.contains("-c:v") && videoArgs[videoArgs.firstIndex(of: "-c:v")! + 1] != "copy" {
+                videoArgs.append(contentsOf: ["-preset", settings.speedPreset.ffmpegName])
+                videoArgs.append(contentsOf: ["-crf", "\(settings.crf)"])
+            }
+        } else {
+            videoArgs = ["-c:v", settings.videoCodec.ffmpegName]
+            videoArgs.append(contentsOf: ["-preset", settings.speedPreset.ffmpegName])
+            videoArgs.append(contentsOf: ["-crf", "\(settings.crf)"])
+        }
+
+        // Build audio arguments
+        var audioArgs: [String] = []
+        if !settings.includeAudio {
+            audioArgs = ["-an"]  // No audio
+        } else if settings.audioCodec == .auto {
+            audioArgs = format.getAudioCodecArgs(sourceCodec: codecs.audioCodec)
+        } else {
+            audioArgs = ["-c:a", settings.audioCodec.ffmpegName]
+        }
+
+        // Subtitle handling
+        var subtitleArgs: [String] = []
+        if settings.includeSubtitles {
+            subtitleArgs = ["-c:s", "copy"]  // Copy subtitles if present
+        } else {
+            subtitleArgs = ["-sn"]  // No subtitles
+        }
+
+        // Bitrate override
+        if let bitrate = settings.customBitrate {
+            videoArgs.append(contentsOf: ["-b:v", "\(bitrate)k"])
+        }
+
+        // Two-pass encoding (more complex, implement if needed)
+        // This requires running ffmpeg twice with different arguments
+
+        // Build final arguments
+        var arguments = ["-i", inputURL.path]
+        arguments.append(contentsOf: videoArgs)
+        arguments.append(contentsOf: audioArgs)
+        arguments.append(contentsOf: subtitleArgs)
+        arguments.append("-y")
+        arguments.append(outputURL.path)
+        
+        print("DEBUG: ffmpeg arguments = \(arguments)")
         
         // Start conversion
         isConverting = true

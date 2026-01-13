@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var selectedFormat: VideoFormat = .mp4
     @State private var isDragging = false
     @State private var isHoveringButton = false
+    @State private var showAdvanced = false
+    @State private var settings = ConversionSettings()
     
     var body: some View {
         ZStack {
@@ -157,6 +159,18 @@ struct ContentView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
                 
+                //Advanced settings
+                if converter.inputURL != nil {
+                    AdvancedSettingsView(
+                        isExpanded: $showAdvanced,
+                        settings: $settings,
+                        inputURL: converter.inputURL!,
+                        selectedFormat: selectedFormat
+                    )
+                    .padding(.horizontal, 40)
+                    .padding(.top, 12)
+                }
+                
                 Spacer()
                 
                 // Progress indicator
@@ -285,7 +299,7 @@ struct ContentView: View {
     private func startConversion() {
         Task {
             do {
-                try await converter.convert(to: selectedFormat)
+                try await converter.convert(to: selectedFormat, settings: settings)
             } catch {
                 DispatchQueue.main.async {
                     errorMessage = error.localizedDescription
