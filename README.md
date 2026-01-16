@@ -17,7 +17,7 @@ Fast, lightweight macOS video converter with smart codec detection and remuxing.
 ## Installation
 
 1. Clone the repo
-2. Open `swift-video-convert.xcodeproj` in Xcode
+2. Open `swiftconvert.xcodeproj` in Xcode
 3. Build and run
 
 ## License
