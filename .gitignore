@@ -1,0 +1,14 @@
+# Xcode
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+
+# Private spec
+SPEC.md
