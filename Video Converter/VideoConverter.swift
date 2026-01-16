@@ -49,6 +49,23 @@ class VideoConverter: ObservableObject {
         return Self.toolPaths[tool]?.first { FileManager.default.fileExists(atPath: $0) }
     }
     
+    //Generates a unique output URL to avoid overwriting existing conversions
+    private func generateUniqueOutputURL(baseURL: URL, format: VideoFormat) -> URL {
+        let directory = baseURL.deletingLastPathComponent()
+        let baseFilename = baseURL.deletingPathExtension().lastPathComponent
+        let ext = format.fileExtension
+        
+        var outputURL = directory.appendingPathComponent("\(baseFilename)_converted.\(ext)")
+        var counter = 1
+        
+        while FileManager.default.fileExists(atPath: outputURL.path) {
+            outputURL = directory.appendingPathComponent("\(baseFilename)_converted_\(counter).\(ext)")
+            counter += 1
+        }
+        
+        return outputURL
+    }
+    
     // Detect video and audio codecs
     func detectCodecs(inputURL: URL) async throws -> (videoCodec: String, audioCodec: String) {
         guard let ffprobePath = getToolPath("ffprobe") else {
@@ -131,11 +148,12 @@ class VideoConverter: ObservableObject {
         if settings.overwriteOriginal {
             outputURL = inputURL
         } else if let custom = settings.customOutputLocation {
-            let filename = inputURL.deletingPathExtension().lastPathComponent + "_converted.\(format.fileExtension)"
-            outputURL = custom.appendingPathComponent(filename)
+            let baseFilename = inputURL.deletingPathExtension().lastPathComponent
+            let filename = "\(baseFilename)_converted.\(format.fileExtension)"
+            let baseURL = custom.appendingPathComponent(filename)
+            outputURL = generateUniqueOutputURL(baseURL: baseURL.deletingPathExtension(), format: format)
         } else {
-            let filename = inputURL.deletingPathExtension().lastPathComponent + "_converted.\(format.fileExtension)"
-            outputURL = inputURL.deletingLastPathComponent().appendingPathComponent(filename)
+            outputURL = generateUniqueOutputURL(baseURL: inputURL, format: format)
         }
         
         print("DEBUG: videoCodec = \(settings.videoCodec), audioCodec = \(settings.audioCodec)")
