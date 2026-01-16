@@ -27,13 +27,16 @@ struct ConversionSettings {
     var audioCodec: AudioCodec = .auto
     
     var speedPreset: SpeedPreset = .medium
-    var crf: Int = 23  // 18-28, lower = better quality
+    var qualityPreset: QualityPreset = .high
+    var crf: Int {
+        qualityPreset.crfValue
+    }
     var twoPassEncoding: Bool = false
     var customBitrate: Int? = nil  // kbps
 }
 
 enum VideoCodec: String, CaseIterable, Identifiable {
-    case auto = "Auto (Smart)"
+    case auto = "Auto"
     case h264 = "H.264"
     case hevc = "H.265 (HEVC)"
     case vp9 = "VP9"
@@ -53,7 +56,7 @@ enum VideoCodec: String, CaseIterable, Identifiable {
 }
 
 enum AudioCodec: String, CaseIterable, Identifiable {
-    case auto = "Auto (Smart)"
+    case auto = "Auto"
     case aac = "AAC"
     case mp3 = "MP3"
     case opus = "Opus"
@@ -90,6 +93,24 @@ enum SpeedPreset: String, CaseIterable, Identifiable {
         case .medium: return "medium"
         case .slow: return "slow"
         case .veryslow: return "veryslow"
+        }
+    }
+}
+
+enum QualityPreset: String, CaseIterable, Identifiable {
+    case low = "Low"
+    case medium = "Medium"
+    case high = "High"
+    case best = "Best"
+    
+    var id: String { rawValue }
+    
+    var crfValue: Int {
+        switch self {
+        case .low: return 28
+        case .medium: return 23
+        case .high: return 20
+        case .best: return 18
         }
     }
 }
