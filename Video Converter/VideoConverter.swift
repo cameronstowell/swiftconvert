@@ -211,6 +211,9 @@ class VideoConverter: ObservableObject {
         
         print("DEBUG: ffmpeg arguments = \(arguments)")
         
+        // Set output URL for cancel/failure cleanup
+        self.outputURL = outputURL
+        
         // Start conversion
         isConverting = true
         progress = 0.0
@@ -268,6 +271,11 @@ class VideoConverter: ObservableObject {
                         self.showSuccess = true
                         continuation.resume()
                     } else {
+                        // Delete incomplete file on failure
+                        if let outputURL = self.outputURL {
+                            try? FileManager.default.removeItem(at: outputURL)
+                        }
+                        self.outputURL = nil
                         continuation.resume(throwing: ConversionError.conversionFailed("Process exited with code \(process.terminationStatus)"))
                     }
                 }
