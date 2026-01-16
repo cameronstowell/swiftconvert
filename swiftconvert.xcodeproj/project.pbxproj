@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		C04AF6CF2F1601B00044227F /* Video Converter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Video Converter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C04AF6CF2F1601B00044227F /* swiftconvert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "swiftconvert.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C04AF6D12F1601B00044227F /* Video Converter */ = {
+		C04AF6D12F1601B00044227F /* swiftconvert */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Video Converter";
+			path = "swiftconvert";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		C04AF6C62F1601B00044227F = {
 			isa = PBXGroup;
 			children = (
-				C04AF6D12F1601B00044227F /* Video Converter */,
+				C04AF6D12F1601B00044227F /* swiftconvert */,
 				C04AF6D02F1601B00044227F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		C04AF6D02F1601B00044227F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C04AF6CF2F1601B00044227F /* Video Converter.app */,
+				C04AF6CF2F1601B00044227F /* swiftconvert.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C04AF6CE2F1601B00044227F /* Video Converter */ = {
+		C04AF6CE2F1601B00044227F /* swiftconvert */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C04AF6DA2F1601B10044227F /* Build configuration list for PBXNativeTarget "Video Converter" */;
+			buildConfigurationList = C04AF6DA2F1601B10044227F /* Build configuration list for PBXNativeTarget "swiftconvert" */;
 			buildPhases = (
 				C04AF6CB2F1601B00044227F /* Sources */,
 				C04AF6CC2F1601B00044227F /* Frameworks */,
@@ -61,13 +61,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C04AF6D12F1601B00044227F /* Video Converter */,
+				C04AF6D12F1601B00044227F /* swiftconvert */,
 			);
-			name = "Video Converter";
+			name = "swiftconvert";
 			packageProductDependencies = (
 			);
-			productName = "Video Converter";
-			productReference = C04AF6CF2F1601B00044227F /* Video Converter.app */;
+			productName = "swiftconvert";
+			productReference = C04AF6CF2F1601B00044227F /* swiftconvert.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C04AF6CA2F1601B00044227F /* Build configuration list for PBXProject "Video Converter" */;
+			buildConfigurationList = C04AF6CA2F1601B00044227F /* Build configuration list for PBXProject "swiftconvert" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C04AF6CE2F1601B00044227F /* Video Converter */,
+				C04AF6CE2F1601B00044227F /* swiftconvert */,
 			);
 		};
 /* End PBXProject section */
@@ -330,7 +330,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C04AF6CA2F1601B00044227F /* Build configuration list for PBXProject "Video Converter" */ = {
+		C04AF6CA2F1601B00044227F /* Build configuration list for PBXProject "swiftconvert" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C04AF6D82F1601B10044227F /* Debug */,
@@ -339,7 +339,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C04AF6DA2F1601B10044227F /* Build configuration list for PBXNativeTarget "Video Converter" */ = {
+		C04AF6DA2F1601B10044227F /* Build configuration list for PBXNativeTarget "swiftconvert" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C04AF6DB2F1601B10044227F /* Debug */,
