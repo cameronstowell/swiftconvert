@@ -1,4 +1,4 @@
-# Swift Video Convert
+# SwiftConvert
 
 Fast, lightweight macOS video converter with smart codec detection and remuxing.
 
